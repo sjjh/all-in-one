@@ -1,0 +1,63 @@
+{
+    "aio_services_v1": [
+        {
+            "container_name": "nextcloud-aio-netdata",
+            "display_name": "Netdata",
+            "image": "netdata/netdata",
+            "image_tag": "stable",
+            "ports": [
+                {
+                    "ip_binding": "",
+                    "port_number": "19999",
+                    "protocol": "tcp"
+                }
+            ],
+            "internal_port": "19999",
+            "restart": "unless-stopped",
+            "cap_add": [
+                "SYS_PTRACE"
+            ],
+            "environment": [
+                "TZ=%TIMEZONE%"
+            ],
+            "apparmor_unconfined": true,
+            "volumes": [
+                {
+                    "source": "nextcloud_aio_backup_netdata_config",
+                    "destination": "/etc/netdata",
+                    "writeable": true
+                },
+                {
+                    "source": "nextcloud_aio_backup_netdata_netdatalib",
+                    "destination": "/var/lib/netdata",
+                    "writeable": true
+                },
+                {
+                    "source": "nextcloud_aio_backup_netdata_netdatacache",
+                    "destination": "/var/cache/netdata",
+                    "writeable": true
+                },
+                {
+                    "source": "/etc/passwd",
+                    "destination": "/host/etc/passwd",
+                    "writeable": false
+                },
+                {
+                    "source": "/proc",
+                    "destination": "/host/proc",
+                    "writeable": false
+                },
+                {
+                    "source": "/sys",
+                    "destination": "/host/sys",
+                    "writeable": false
+                },
+                {
+                    "source": "/etc/os-release",
+                    "destination": "/host/etc/os-release",
+                    "writeable": false
+                }
+            ]
+        }
+    ]
+}
