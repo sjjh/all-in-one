@@ -32,6 +32,7 @@ videoheight = 1080
 directory = /tmp
 
 [backend-1]
+# Main Nextcloud domain
 url = https://${NC_DOMAIN}
 secret = ${RECORDING_SECRET}
 skipverify = false
@@ -40,6 +41,7 @@ skipverify = false
 signalings = signaling-1
 
 [signaling-1]
+# HPB domain
 url = https://${NC_DOMAIN}/standalone-signaling/
 internalsecret = ${INTERNAL_SECRET}
 
