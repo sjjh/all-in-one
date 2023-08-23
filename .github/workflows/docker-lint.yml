@@ -2,8 +2,8 @@ name: Docker Lint
 
 on:
   pull_request:
-    paths:
-      - 'Containers/**'
+    # paths:
+    #   - 'Containers/**'
   push:
     branches:
       - main
@@ -27,28 +27,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install npm and dockerfilelint
+      - name: Install hadolint
         run: |
-          sudo apt-get update
-          sudo apt-get install nodejs npm -y --no-install-recommends
-          npm install -g dockerfilelint
-          wget https://github.com/replicatedhq/dockerfilelint/pull/201.patch -O /usr/local/lib/node_modules/dockerfilelint/201.patch
-          CURRENT_DIR=$PWD
-          cd /usr/local/lib/node_modules/dockerfilelint/
-          git apply 201.patch
-          cd $CURRENT_DIR
-          cat << RULES > ./.dockerfilelintrc
-          rules:
-            sudo_usage: off
-          RULES
+          sudo wget https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -O /usr/bin/hadolint
+          sudo chmod +x /usr/bin/hadolint
 
       - name: run lint
         run: |
           DOCKERFILES="$(find ./Containers -name Dockerfile)"
           mapfile -t DOCKERFILES <<< "$DOCKERFILES"
           for file in "${DOCKERFILES[@]}"; do
-            dockerfilelint "$file" --config ./ | tee -a ./dockerfilelint.log
+            # DL3018 warning: Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`
+            # DL3008 warning: Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`
+            # DL3002 warning: Last USER should not be root
+            # DL3003 warning: Use WORKDIR to switch to a directory
+            # DL3004 error: Do not use sudo as it leads to unpredictable behavior. Use a tool like gosu to enforce root
+            hadolint "$file" --ignore DL3018 --ignore DL3008 --ignore DL3002 --ignore DL3003 --ignore DL3004 | tee -a ./hadolint.log
           done
-          if grep "^Issues: [0-9]" ./dockerfilelint.log; then
+          cat ./hadolint.log
+          if grep -q "DL[0-9]\+" ./hadolint.log; then
             exit 1
           fi
