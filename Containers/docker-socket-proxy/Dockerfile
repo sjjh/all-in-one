@@ -8,4 +8,4 @@ COPY --chmod=775 start.sh /start.sh
 COPY --chmod=664 haproxy.cfg /conf/haproxy.cfg
 
 ENTRYPOINT ["/start.sh"]
-HEALTHCHECK CMD [ $(curl https://127.0.0.1:2375/v1.41/_ping -ks) = "OK" ] || exit 1
+HEALTHCHECK CMD [ "$(curl http://127.0.0.1:2375/v1.41/_ping -s)" = "OK" ] || exit 1
